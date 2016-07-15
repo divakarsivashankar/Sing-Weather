@@ -1,0 +1,38 @@
+<resources>
+    <string name="app_name">Sing Weather</string>
+    <string name="BR">Mist</string>
+    <string name="CL">Cloudy</string>
+    <string name="DR">Drizzle</string>
+    <string name="FA">Fair (Day)</string>
+    <string name="FG">Fog</string>
+    <string name="FN">Fair (Night)</string>
+    <string name="FW">Fair &amp; Warm</string>
+    <string name="HG">Heavy Thundery Showers with Gusty Winds</string>
+    <string name="HR">Heavy Rain</string>
+    <string name="HS">Heavy Showers</string>
+    <string name="HT">Heavy Thundery Showers</string>
+    <string name="HZ">Hazy</string>
+    <string name="LH">Slightly Hazy</string>
+    <string name="LR">Light Rain</string>
+    <string name="LS">Light Showers</string>
+    <string name="OC">Overcast</string>
+    <string name="PC">Partly Cloudy (Day)</string>
+    <string name="PN">Partly Cloudy (Night)</string>
+    <string name="PS">Passing Showers</string>
+    <string name="RA">Moderate Rain</string>
+    <string name="SH">Showers</string>
+    <string name="SK">Strong Winds, Showers</string>
+    <string name="SN">Snow</string>
+    <string name="SR">Strong Winds, Rain</string>
+    <string name="SS">Snow Showers</string>
+    <string name="SU">Sunny</string>
+    <string name="SW">Strong Winds</string>
+    <string name="TL">Thundery Showers</string>
+    <string name="WC">Windy, Cloudy</string>
+    <string name="WD">Windy</string>
+    <string name="WF">Windy, Fair</string>
+    <string name="WR">Windy, Rain</string>
+    <string name="WS">Windy, Showers</string>
+
+
+</resources>
