@@ -121,33 +121,32 @@ public class MainActivity extends AppCompatActivity {
             List<Address> addresses = null;
 
             try {
-                addresses = geocoder.getFromLocation(
-                        mll.getLatitude(),
-                        mll.getLongitude(),
-                        // In this sample, get just a single address.
-                        1);
+                addresses = geocoder.getFromLocation(latitude,longitude,1);
 
-                String address1 = addresses.get(0).getAddressLine(0);
+                if(addresses != null) {
+
+                    String address1 = addresses.get(0).getAddressLine(0);
 
 
-                for(String area : areaNames) {
-                    if(address1.contains(area)) {
+                    for (String area : areaNames) {
+                        if (address1.contains(area)) {
 
-                         locality = area;
+                            locality = area;
+                        }
                     }
+
+                    if (!locality.equals(null)) {
+                        address.append(locality);
+                        new newParseMagic().execute();
+                        new parseMagic().execute();
+
+                    } else {
+                        address.append(address1);
+                        new newParseMagic().execute();
+
+                    }
+
                 }
-
-                if(!locality.equals(null)){
-                    address.append(locality);
-                    new newParseMagic().execute();
-                    new parseMagic().execute();
-
-                } else {
-                    address.append(address1);
-                    new newParseMagic().execute();
-
-                }
-
 
 
             } catch (IOException ioException) {
@@ -163,7 +162,8 @@ public class MainActivity extends AppCompatActivity {
                         mll.getLongitude(), illegalArgumentException);
             }
 
-            }else{
+            }
+        else{
             // can't get location
             // GPS or Network is not enabled
             // Ask user to enable GPS/network in settings
