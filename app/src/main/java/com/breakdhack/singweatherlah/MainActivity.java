@@ -26,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
     ImageView wImage;
     TrackLocation mll;
     NEAWeatherService nws;
-    String locality = null, newFCast;
+    String locality = "", newFCast;
+    private boolean alreadyCalled = false;
     String areaNames[] = {
             "Ang Mo Kio",
             "Bedok",
@@ -103,6 +104,14 @@ public class MainActivity extends AppCompatActivity {
         j= "WR-WS";
 
 
+       callAllFuctions();
+
+    }
+
+    private void callAllFuctions(){
+
+        alreadyCalled = true;
+
         mll = new TrackLocation(MainActivity.this);
 
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
@@ -123,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 addresses = geocoder.getFromLocation(latitude,longitude,1);
 
-                if(addresses != null) {
+                if(addresses != null || addresses.size() != 0) {
 
                     String address1 = addresses.get(0).getAddressLine(0);
 
@@ -135,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
 
-                    if (!locality.equals(null)) {
+                    if (!(locality.length() == 0)) {
                         address.append(locality);
                         new newParseMagic().execute();
                         new parseMagic().execute();
@@ -145,6 +154,12 @@ public class MainActivity extends AppCompatActivity {
                         new newParseMagic().execute();
 
                     }
+
+                } else {
+
+                    address.setText("");
+                    new newParseMagic().execute();
+                    new parseMagic().execute();
 
                 }
 
@@ -162,7 +177,7 @@ public class MainActivity extends AppCompatActivity {
                         mll.getLongitude(), illegalArgumentException);
             }
 
-            }
+        }
         else{
             // can't get location
             // GPS or Network is not enabled
@@ -183,10 +198,11 @@ public class MainActivity extends AppCompatActivity {
             String newData = getString(resId);
             hForeCast.append(locality + " will be " + newData);
         } else {
-            hForeCast.append(" it will be " +newFCast);
-            int resourceID = getResources().getIdentifier("drawable/" +newFCast,null,getPackageName());
-            Drawable wIcon = getResources().getDrawable(resourceID);
-            wImage.setImageDrawable(wIcon);
+            //hForeCast.append(" it will be " +newFCast);
+            setData(newFCast);
+//            int resourceID = getResources().getIdentifier("drawable/" +newFCast,null,getPackageName());
+//            Drawable wIcon = getResources().getDrawable(resourceID);
+//            wImage.setImageDrawable(wIcon);
         }
     }
 
@@ -248,7 +264,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else
         {
-            int resourceID = getResources().getIdentifier("drawable/" +data,null,getPackageName());
+            int resourceID = getResources().getIdentifier("drawable/" +data.toLowerCase(),null,getPackageName());
             Drawable wIcon = getResources().getDrawable(resourceID);
             wImage.setImageDrawable(wIcon);
 
@@ -297,11 +313,43 @@ public class MainActivity extends AppCompatActivity {
 
     private void setTodayData(String[] result) {
 
-        hTemp.append(result[0]+ " \u2103");
-        lTemp.append(result[1]+ " \u2103");
+        hTemp.append(result[0] + " \u2103");
+        lTemp.append(result[1] + " \u2103");
         tForeCast.append(result[2]);
         newFCast = result[3];
+        if(locality.equals("") || locality.equals(null)) {
+            setData(newFCast);
+        }
 
     }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();  // Always call the superclass method first
+
+        hTemp.setText("High = ");
+        lTemp.setText("Low = ");
+        lat.setText("Your Latitude = ");
+        tForeCast.setText("Today Forecast for the Island is ");
+        lon.setText("Your Longitude = ");
+        hForeCast.setText("For the Next 2 hours ");
+        address.setText("Your Locality is ");
+
+        alreadyCalled = false;
+
+
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();  // Always call the superclass method first
+
+        if (!alreadyCalled) {
+            callAllFuctions();
+        }
+    }
+
 
 }
