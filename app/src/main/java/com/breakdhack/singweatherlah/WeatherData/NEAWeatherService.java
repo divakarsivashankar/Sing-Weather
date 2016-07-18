@@ -24,78 +24,12 @@ public class NEAWeatherService {
     public String foreCast;
     String res;
 
-
-
-    public String weatherForeCast( String locality){
-
-                String endpoint = String.format("http://www.nea.gov.sg/api/WebAPI/?dataset=2hr_nowcast&keyref=781CF461BB6606AD907750DFD1D0766719B9623861E0B07B");
-
-                try
-
-                {
-                    URL url = new URL(endpoint);
-                    HttpURLConnection con = (HttpURLConnection)url.openConnection();
-                    con.setRequestMethod("GET");
-                    InputStream inputStream = con.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                    String inputLine;
-                    StringBuffer response = new StringBuffer();
-                    while((inputLine = reader.readLine()) != null) {
-                        response.append(inputLine);
-                    }
-                    reader.close();
-
-                    String resXML =   response.toString();;
-                    JSONObject jsonObj = null;
-
-                    jsonObj = XML.toJSONObject(resXML);
-
-
-                    JSONObject jObject = jsonObj.optJSONObject("channel");
-                    JSONObject iObject = jObject.optJSONObject("item");
-                    JSONObject wObject = iObject.optJSONObject("weatherForecast");
-                    JSONArray jArray = wObject.getJSONArray("area");
-
-
-                    for (int i = 0; i < jArray.length(); i++) {
-                        try {
-                            JSONObject oneObject = jArray.getJSONObject(i);
-                            // Pulling items from the array
-                            String oneObjectsItem = oneObject.getString("name");
-                            if (oneObjectsItem.equals(locality)) {
-                                String oneObjectsItem2 = oneObject.getString("forecast");
-                                foreCast = oneObjectsItem2;
-                            }
-                        } catch (JSONException e) {
-                            // Oops
-                        }
-                    }
-
-                    return foreCast;
-
-                }
-
-                catch(Exception e)
-                {
-                    err = e;
-                }
-
-
-                return null;
-
-    }
-
-
-
-
-    public String[] dayForeCast(){
-
-        String endpoint = String.format("http://www.nea.gov.sg/api/WebAPI/?dataset=24hrs_forecast&keyref=781CF461BB6606AD907750DFD1D0766719B9623861E0B07B");
+    public JSONObject getFromWebService(String endpointURL){
 
         try
 
         {
-            URL url = new URL(endpoint);
+            URL url = new URL(endpointURL);
             HttpURLConnection con = (HttpURLConnection)url.openConnection();
             con.setRequestMethod("GET");
             InputStream inputStream = con.getInputStream();
@@ -108,11 +42,74 @@ public class NEAWeatherService {
             reader.close();
 
             String resXML =   response.toString();;
+
             JSONObject jsonObj = null;
 
             jsonObj = XML.toJSONObject(resXML);
 
+            return jsonObj;
 
+        }
+
+        catch(Exception e)
+        {
+            err = e;
+        }
+
+
+        return null;
+    }
+
+
+    public String weatherForeCast( String locality){
+
+        String endpoint = String.format("http://www.nea.gov.sg/api/WebAPI/?dataset=2hr_nowcast&keyref=781CF461BB6606AD907750DFD1D0766719B9623861E0B07B");
+
+        try {
+            JSONObject jsonObj = null;
+            jsonObj = getFromWebService(endpoint);
+            JSONObject jObject = jsonObj.optJSONObject("channel");
+            JSONObject iObject = jObject.optJSONObject("item");
+            JSONObject wObject = iObject.optJSONObject("weatherForecast");
+            JSONArray jArray = null;
+
+            jArray = wObject.getJSONArray("area");
+
+
+            for (int i = 0; i < jArray.length(); i++) {
+
+                JSONObject oneObject = jArray.getJSONObject(i);
+                // Pulling items from the array
+                String oneObjectsItem = oneObject.getString("name");
+                if (oneObjectsItem.equals(locality)) {
+                    String oneObjectsItem2 = oneObject.getString("forecast");
+                    foreCast = oneObjectsItem2;
+
+                }
+            }
+            return foreCast;
+        }
+
+        catch (JSONException e) {
+                            // Oops
+                        }
+               return "";
+
+
+
+    }
+
+
+
+
+    public String[] dayForeCast(){
+
+        String endpoint = String.format("http://www.nea.gov.sg/api/WebAPI/?dataset=24hrs_forecast&keyref=781CF461BB6606AD907750DFD1D0766719B9623861E0B07B");
+        JSONObject jsonObj = null;
+        jsonObj = getFromWebService(endpoint);
+        try
+
+        {
             JSONObject jObject = jsonObj.optJSONObject("channel");
             JSONObject iObject = jObject.optJSONObject("main");
             JSONObject wObject = iObject.optJSONObject("temperature");

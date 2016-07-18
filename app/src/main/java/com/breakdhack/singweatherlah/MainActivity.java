@@ -1,9 +1,13 @@
 package com.breakdhack.singweatherlah;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -129,61 +133,93 @@ public class MainActivity extends AppCompatActivity {
 
             List<Address> addresses = null;
 
-            try {
-                addresses = geocoder.getFromLocation(latitude,longitude,1);
-
-                if(addresses != null || addresses.size() != 0) {
-
-                    String address1 = addresses.get(0).getAddressLine(0);
+            if (longitude != 0.0 || latitude != 0.0) {
 
 
-                    for (String area : areaNames) {
-                        if (address1.contains(area)) {
+                try {
 
-                            locality = area;
+
+
+                    addresses = geocoder.getFromLocation(latitude, longitude, 1);
+
+                    if (addresses != null || addresses.size() != 0) {
+
+                        String address1 = addresses.get(0).getAddressLine(0);
+
+
+                        for (String area : areaNames) {
+                            if (address1.contains(area)) {
+
+                                locality = area;
+                            }
                         }
-                    }
 
-                    if (!(locality.length() == 0)) {
-                        address.append(locality);
+                        if (!(locality.length() == 0)) {
+                            address.append(locality);
+                            new newParseMagic().execute();
+                            new parseMagic().execute();
+
+                        } else {
+                            address.append(address1);
+                            new newParseMagic().execute();
+
+                        }
+
+                    } else {
+
+                        address.setText("");
                         new newParseMagic().execute();
                         new parseMagic().execute();
 
-                    } else {
-                        address.append(address1);
-                        new newParseMagic().execute();
-
                     }
 
-                } else {
 
-                    address.setText("");
-                    new newParseMagic().execute();
-                    new parseMagic().execute();
-
+                } catch (IOException ioException) {
+                    // Catch network or other I/O problems.
+                    String errorMessage = "service_not_available";
+                    Log.e(TAG, errorMessage, ioException);
+                } catch (IllegalArgumentException illegalArgumentException) {
+                    // Catch invalid latitude or longitude values.
+                    String errorMessage = "invalid_lat_long_used";
+                    Log.e(TAG, errorMessage + ". " +
+                            "Latitude = " + mll.getLatitude() +
+                            ", Longitude = " +
+                            mll.getLongitude(), illegalArgumentException);
                 }
 
-
-            } catch (IOException ioException) {
-                // Catch network or other I/O problems.
-                String errorMessage = "service_not_available";
-                Log.e(TAG, errorMessage, ioException);
-            } catch (IllegalArgumentException illegalArgumentException) {
-                // Catch invalid latitude or longitude values.
-                String errorMessage = "invalid_lat_long_used";
-                Log.e(TAG, errorMessage + ". " +
-                        "Latitude = " + mll.getLatitude() +
-                        ", Longitude = " +
-                        mll.getLongitude(), illegalArgumentException);
+            }
+            else{
+                // can't get location
+                // GPS or Network is not enabled
+                // Ask user to enable GPS/network in settings
+                mll.showSettingsAlert();
             }
 
+
+        } else {
+
+                AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+                // Setting Dialog Title
+                alertDialog.setTitle("GPS not Recognising");
+
+                // Setting Dialog Message
+                alertDialog.setMessage("Your GPS is not returning your location. We believe you are indoors, which will have some some screening effect");
+
+                // On pressing Settings button
+                alertDialog.setPositiveButton("Close App", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,int which) {
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                       // System.exit(1);
+                        System.exit(0);
+                    }
+                });
+
+                // Showing Alert Message
+                alertDialog.show();
         }
-        else{
-            // can't get location
-            // GPS or Network is not enabled
-            // Ask user to enable GPS/network in settings
-            mll.showSettingsAlert();
-        }
+
+
 
 
     }
