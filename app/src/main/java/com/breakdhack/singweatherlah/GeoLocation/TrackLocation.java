@@ -1,6 +1,7 @@
 package com.breakdhack.singweatherlah.GeoLocation;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Context;
@@ -14,11 +15,19 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
+
+import com.breakdhack.singweatherlah.MainActivity;
 
 public class TrackLocation extends Service implements LocationListener {
 
     private final Context mContext;
+
+    MainActivity ma = new MainActivity();
+
+    public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 13;
+
 
     // flag for GPS status
     boolean isGPSEnabled = false;
@@ -28,6 +37,7 @@ public class TrackLocation extends Service implements LocationListener {
 
     // flag for GPS status
     boolean canGetLocation = false;
+
 
     Location location; // location
     double latitude; // latitude
@@ -42,13 +52,20 @@ public class TrackLocation extends Service implements LocationListener {
     // Declaring a Location Manager
     protected LocationManager locationManager;
 
+//    public TrackLocation (Activity activity)
+//    {
+//        super();
+//        mActivity = activity;
+//    }
+
     public TrackLocation(Context context) {
         this.mContext = context;
         getLocation();
     }
 
-    public Location getLocation() {
+    public Location getLocation() throws SecurityException{
         try {
+
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
 
@@ -62,6 +79,7 @@ public class TrackLocation extends Service implements LocationListener {
 
             if (!isGPSEnabled && !isNetworkEnabled) {
                 // no network provider is enabled
+                // showSettingsAlert();
             } else {
                 this.canGetLocation = true;
                 // First get location from Network Provider
@@ -69,33 +87,26 @@ public class TrackLocation extends Service implements LocationListener {
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     if (location == null) {
+
                         locationManager.requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
                                 MIN_DISTANCE_CHANGE_FOR_UPDATES, this);
                         Log.d("GPS Enabled", "GPS Enabled");
                         if (locationManager != null) {
-                            location = locationManager
-                                    .getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                             if (location != null) {
                                 latitude = location.getLatitude();
                                 longitude = location.getLongitude();
                             }
                         }
                     }
+                } else {
+                    showSettingsAlert();
                 }
 
                 if (isNetworkEnabled) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        // TODO: Consider calling
-                        //    ActivityCompat#requestPermissions
-                        // here to request the missing permissions, and then overriding
-                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                        //                                          int[] grantResults)
-                        // to handle the case where the user grants the permission. See the documentation
-                        // for ActivityCompat#requestPermissions for more details.
 
-                    }
                     locationManager.requestLocationUpdates(
                             LocationManager.NETWORK_PROVIDER,
                             MIN_TIME_BW_UPDATES,
@@ -123,18 +134,10 @@ public class TrackLocation extends Service implements LocationListener {
      * Stop using GPS listener
      * Calling this function will stop using GPS in your app
      * */
-    public void stopUsingGPS() {
+    public void stopUsingGPS() throws SecurityException {
         if (locationManager != null) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
+
+
             locationManager.removeUpdates(TrackLocation.this);
         }
     }
@@ -202,6 +205,10 @@ public class TrackLocation extends Service implements LocationListener {
         // Showing Alert Message
         alertDialog.show();
     }
+
+
+
+
 
     @Override
     public void onLocationChanged(Location location) {
